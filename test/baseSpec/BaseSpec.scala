@@ -11,7 +11,12 @@ import play.api.i18n.MessagesApi
 import play.api.inject.Injector
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSClient
-import play.api.mvc.MessagesControllerComponents
+import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
+import play.api.test.CSRFTokenHelper.CSRFFRequestHeader
+import play.api.test.FakeRequest
+import play.api.test.Helpers.{GET, POST}
+import repositories.DataRepository
+import service.{LibraryService, RepositoryService}
 import shared.TestRequest
 
 import scala.concurrent.ExecutionContext
@@ -32,11 +37,23 @@ trait BaseSpecWithApplication extends BaseSpec with GuiceOneServerPerSuite with 
   override def fakeApplication(): Application =
     new GuiceApplicationBuilder()
       .configure(Map(
-        "mongodb.uri"                                    -> "mongodb://localhost:27017/gitHubTutorial"
+        "mongodb.uri"                                    -> "mongodb://localhost:27017/githubTutorial"
       ))
       .build()
 
 
   protected val testRequest: TestRequest = new TestRequest(messagesApi)
+  lazy val repository: DataRepository = injector.instanceOf[DataRepository]
+  lazy val service: LibraryService = injector.instanceOf[LibraryService]
+  lazy val repService: RepositoryService = injector.instanceOf[RepositoryService]
+  lazy val fakeRequest: FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest("", "").withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+  //  Similarly, buildPost and buildGet are methods we can use in the tests to pass fake requests to the controller
+  def buildPost(url: String): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(POST, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+  def buildGet(url: String): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(GET, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
 }

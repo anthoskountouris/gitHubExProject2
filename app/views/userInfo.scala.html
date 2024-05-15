@@ -1,0 +1,15 @@
+@(user: GitHubUser)
+
+@main("GitHub User") {
+    <div class="title">
+        <h1>GitHub User</h1>
+    </div>
+    <div class="info">
+        <h2>@user.login</h2>
+        <h3>User Information</h3>
+        <p>Followers: @user.followers</p>
+        <p>Following: @user.following</p>
+        <p>Created at: @user.created_at</p>
+    </div>
+
+}
