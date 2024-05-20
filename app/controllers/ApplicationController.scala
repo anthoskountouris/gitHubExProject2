@@ -90,4 +90,13 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
     }
   }
 
+  def getRepoContent(username:String, repoName:String): Action[AnyContent] = Action.async { implicit request =>
+    libService.getRepoContent(username = username, repoName = repoName).value.map {
+      case Right(content) =>
+        Ok(views.html.repoContent(content))
+      case Left(apiError: APIError) =>
+        BadRequest((Json.obj("error" -> apiError.reason)))
+    }
+  }
+
 }

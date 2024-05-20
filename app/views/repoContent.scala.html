@@ -1,0 +1,18 @@
+@(repoContent: List[RepoContent])
+
+@main("GitHub User") {
+    <div class="title">
+        <h1>Names of files & folders </h1>
+    </div>
+    <div class="repos">
+    @for(con <- repoContent) {
+        <p>@con.name</p>
+    }
+    </div>
+    <div class="btn-container">
+        <a class="btn" href="@routes.ApplicationController.getGithubUser(repoContent.head.url.split("/")(4))">
+            Go to GitHub User
+        </a>
+    </div>
+
+}

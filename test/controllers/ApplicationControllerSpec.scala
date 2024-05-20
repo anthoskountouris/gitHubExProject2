@@ -139,10 +139,21 @@ class ApplicationControllerSpec extends BaseSpecWithApplication with Injecting {
     }
   }
 
-//  "ApplicationController .addGithubUserFromApi()" should{
-//    val deleteRequest: Future[Result] = TestApplicationController.delete(dataModel.login)(FakeRequest())
-//    val request:FakeRequest[JsValue] = FakeRequest().withBody[JsValue](Json.toJson(dataModel2))
-//  }
+  "ApplicationController .getRepoContent" should {
+    "return files/dirs of a repository (return 200 OK)" in {
+      val existingUsername:String = "anthoskountouris"
+      val existingRepository:String ="Analysing_The_Discourse_Related_To_Electrical_Vehicles_On_Social_Media"
+      val resultFuture: Future[Result] = TestApplicationController.getRepoContent(existingUsername, existingRepository)(FakeRequest())
+      await(resultFuture).header.status shouldBe OK
+    }
 
+    "return 400" in {
+      val existingUsername:String = "anthoskountouris"
+      val existingRepository:String ="randomRepo"
+      val resultFuture: Future[Result] = TestApplicationController.getRepoContent(existingUsername, existingRepository)(FakeRequest())
+      await(resultFuture).header.status shouldBe BAD_REQUEST
+      println(await(resultFuture))
+    }
+  }
 
 }
