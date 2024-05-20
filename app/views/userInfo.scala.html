@@ -11,5 +11,9 @@
         <p>Following: @user.following</p>
         <p>Created at: @user.created_at</p>
     </div>
-
+    <div class="btn-container">
+        <a class="btn" href="@routes.ApplicationController.getUserRepos(user.login)">
+            Repositories
+        </a>
+    </div>
 }

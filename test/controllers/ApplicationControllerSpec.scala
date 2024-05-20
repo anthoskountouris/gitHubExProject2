@@ -122,7 +122,20 @@ class ApplicationControllerSpec extends BaseSpecWithApplication with Injecting {
 
       val deleteRequestFailed: Future[Result] = TestApplicationController.delete("Kokos")(FakeRequest())
       await(deleteRequestFailed).header.status shouldBe BAD_REQUEST
+    }
+  }
 
+  "ApplicationController .getUserRepos" should {
+    "return repositories of a user (return 200 OK)" in {
+      val existingUsername:String = "anthoskountouris"
+      val resultFuture = TestApplicationController.getUserRepos(existingUsername)(FakeRequest())
+      await(resultFuture).header.status shouldBe OK
+    }
+
+    "return 400" in {
+      val nonExistingUsername:String = "panikkos1212121"
+      val resultFuture = TestApplicationController.getUserRepos(nonExistingUsername)(FakeRequest())
+      await(resultFuture).header.status shouldBe BAD_REQUEST
     }
   }
 

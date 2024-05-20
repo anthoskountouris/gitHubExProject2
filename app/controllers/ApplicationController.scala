@@ -1,6 +1,6 @@
 package controllers
 
-import models.{APIError, GitHubUser}
+import models.{APIError, GitHubUser, UserRepos}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import play.mvc.Results.redirect
@@ -74,6 +74,19 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
       //            Future(BadRequest(Json.toJson("Invalid data model")))
       case Left(error) =>
         Future(BadRequest(Json.toJson("Something went wrong")))
+    }
+  }
+
+  def getUserRepos(username:String): Action[AnyContent] = Action.async { implicit request =>
+    libService.getUserRepos(username = username).value.map {
+      case Right(repos) =>
+      //      Ok {Json.toJson(repos)}
+        Ok(views.html.repositories(repos))
+      //            Ok(Json.toJson(user))
+      //          case JsError(errors) =>
+      //            Future(BadRequest(Json.toJson("Invalid data model")))
+      case Left(apiError: APIError) =>
+        BadRequest(Json.obj("error" -> apiError.reason))
     }
   }
 

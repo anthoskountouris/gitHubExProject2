@@ -1,7 +1,7 @@
 .title{
     text-align: center;
     padding: 30px;
-    margin-bottom: 100px;
+    margin-bottom: 50px;
     /*color: blue;*/
     background-color: dimgrey;
     color: white;
@@ -11,3 +11,37 @@
     text-align: center;
     padding: 30px;
 }
+
+.repos {
+    /*display: flex; !* Enable flexbox *!*/
+    justify-content: center; /* Centers items horizontally */
+    align-items: center;    /* Centers items vertically */
+    height: auto;          /* Set a height for the example */
+    border: 1px solid #000; /* Just for visual reference */
+    text-align: center; /* Keeps text aligned to the left */
+    width: 700px;
+    margin: 0 auto; /* Center the .repos div itself within its parent */
+}
+
+.btn-container{
+    display: flex;
+    justify-content: center; /* Centers the items horizontally */
+    align-items: center;    /* Centers the items vertically */
+    height: 10vh;          /* Full height of the viewport */
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: black;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    align-items: center;    /* Centers items vertically */
+
+}
+
