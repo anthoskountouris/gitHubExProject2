@@ -129,6 +129,7 @@ class ApplicationControllerSpec extends BaseSpecWithApplication with Injecting {
     "return repositories of a user (return 200 OK)" in {
       val existingUsername:String = "anthoskountouris"
       val resultFuture = TestApplicationController.getUserRepos(existingUsername)(FakeRequest())
+      println("resultFuture",resultFuture)
       await(resultFuture).header.status shouldBe OK
     }
 

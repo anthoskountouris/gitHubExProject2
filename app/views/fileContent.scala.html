@@ -1,0 +1,16 @@
+@(fileContent: FileContent, username:String, repoName:String, path:String)
+
+@main("GitHub User") {
+    <div class="title">
+        <h1>Content of @fileContent.name</h1>
+    </div>
+    <div class="repos">
+        <p>@fileContent.content</p>
+    </div>
+
+    <div class="btn-container">
+        <a class="btn" href="@routes.ApplicationController.getRepoContent(username, repoName)">
+            Back
+        </a>
+    </div>
+}

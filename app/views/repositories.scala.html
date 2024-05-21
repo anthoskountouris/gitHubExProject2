@@ -1,18 +1,17 @@
-@(repo: List[UserRepos])
+@(repo: List[UserRepos], username:String)
 
 @main("GitHub User") {
     <div class="title">
-        <h1>Repositories of @repo.head.owner.login!</h1>
+        <h1>Repositories of @username!</h1>
     </div>
     <div class="repos">
         @for(rep <- repo) {
-            <p>@rep.name</p>
+            <p><a href="@routes.ApplicationController.getRepoContent(username, rep.name)">@rep.name</a></p>
         }
     </div>
     <div class="btn-container">
         <a class="btn" href="@routes.ApplicationController.getGithubUser(repo.head.owner.login)">
-            Go to GitHub User
+            Back
         </a>
     </div>
-
 }

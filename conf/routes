@@ -24,4 +24,5 @@ GET /github/users/:username/repositories        controllers.ApplicationControlle
 
 GET /github/users/:username/repos/:repoName     controllers.ApplicationController.getRepoContent(username:String, repoName:String)
 
-# https://api.github.com/repos/anthoskountouris/Analysing_The_Discourse_Related_To_Electrical_Vehicles_On_Social_Media/contents/
+GET /github/users/:username/repos/:repoName/*path       controllers.ApplicationController.getFileOrDirContent(username:String, repoName:String, path:String)
+

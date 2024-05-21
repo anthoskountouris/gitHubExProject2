@@ -7,4 +7,3 @@ case class GitHubUser(login: String, created_at: Option[String], followers:Optio
 object GitHubUser{
   implicit val formats: OFormat[GitHubUser] = Json.format[GitHubUser]
 }
-

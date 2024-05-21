@@ -1,4 +1,4 @@
-@(repoContent: List[RepoContent])
+@(repoContent: List[RepoContent], username:String, repoName: String)
 
 @main("GitHub User") {
     <div class="title">
@@ -6,13 +6,12 @@
     </div>
     <div class="repos">
     @for(con <- repoContent) {
-        <p>@con.name</p>
+        <p><a href="@routes.ApplicationController.getFileOrDirContent(username, repoName, con.name)">@con.name</a></p>
     }
     </div>
     <div class="btn-container">
-        <a class="btn" href="@routes.ApplicationController.getGithubUser(repoContent.head.url.split("/")(4))">
-            Go to GitHub User
+        <a class="btn" href="@routes.ApplicationController.getUserRepos(username)">
+            Back
         </a>
     </div>
-
 }

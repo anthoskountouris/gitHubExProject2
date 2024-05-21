@@ -1,0 +1,18 @@
+@(dirContent: List[DirContent], username:String, repoName:String, path:String)
+
+@main("GitHub User") {
+    <div class="title">
+        <h1>Names of files & folders </h1>
+    </div>
+    <div class="repos">
+    @for(con <- dirContent) {
+        <p><a href="@routes.ApplicationController.getFileOrDirContent(username, repoName, con.path)">@con.name</a></p>
+    }
+    </div>
+
+    <div class="btn-container">
+        <a class="btn" href="@routes.ApplicationController.getRepoContent(username, repoName)">
+            Back
+        </a>
+    </div>
+ }
