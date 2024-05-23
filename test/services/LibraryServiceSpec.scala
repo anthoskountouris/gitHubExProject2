@@ -3,7 +3,8 @@ package services
 import baseSpec.BaseSpec
 import cats.data.EitherT
 import connector.LibraryConnector
-import models.{APIError, GitHubUser, RepoContent, UserRepos}
+import models.{APIError, DirContent, FileContent, GitHubUser, RepoContent, UserRepos}
+import okhttp3.Response
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -148,6 +149,46 @@ class LibraryServiceSpec extends BaseSpec with MockFactory with ScalaFutures wit
     }
   }
 
+  val file:JsValue = Json.parse("""{"name":".gitignore","path":".gitignore","type":"file","content":"Ly5EU19TdG9yZQ==\n"}""")
+  val dir: JsValue = Json.parse("""[{"name":"Search_Twitter_API.py","path":"Twitter_API/Search_Twitter_API.py","type":"file"},{"name":"Streaming_Twitter_te_Final.py","path":"Twitter_API/Streaming_Twitter_te_Final.py","type":"file"}]""")
 
+  "getFileOrDirContent" should {
+    val url:String = "testurl"
+
+    "return the file of the repository" in {
+      (mockConnector.get3[FileContent](_: String)(_: OFormat[FileContent], _:ExecutionContext))
+        .expects(url, *, *)
+        .returning(EitherT.rightT(Right(file.as[FileContent])))
+//        .once
+
+      whenReady(testService.getFileOrDirContent(urlOverride = Some(url), username = "", repoName = "", path="").value) {
+        result => result shouldBe Right(Right(file.as[FileContent]))
+      }
+    }
+
+    "return a directory of a repository" in {
+      (mockConnector.get3[DirContent](_: String)(_: OFormat[DirContent], _:ExecutionContext))
+        .expects(url, *, *)
+        .returning(EitherT.rightT(Left(dir.as[List[DirContent]])))
+//        .once
+//      println(dir)
+
+      whenReady(testService.getFileOrDirContent(urlOverride = Some(url), username = "", repoName = "", path="").value) {
+        result => result shouldBe Right(Left((dir.as[List[DirContent]])))
+      }
+    }
+
+    "return an error" in {
+      (mockConnector.get3[DirContent](_: String)(_: OFormat[DirContent], _: ExecutionContext))
+        .expects(url, *, *)
+        .returning(EitherT.leftT(APIError.BadAPIResponse(500, "Could not connect")))
+//        .repeat(2)
+        .twice()
+
+      whenReady(testService.getFileOrDirContent(urlOverride = Some(url), username = "", repoName = "", path = "").value) {
+        result => result shouldBe Left(APIError.BadAPIResponse(500, "Could not connect"))
+      }
+    }
+  }
 
 }

@@ -26,6 +26,7 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
   def getGithubUser(username: String): Action[AnyContent] = Action.async { implicit request =>
     libService.getGithubUser(username = username).value.map {
       case Right(user) =>
+//        println(Json.toJson(user))
         Ok(views.html.userInfo(user))
       //            Ok(Json.toJson(user))
       //          case JsError(errors) =>
@@ -100,8 +101,8 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
 
   def getRepoContent(username: String, repoName: String): Action[AnyContent] = Action.async { implicit request =>
     libService.getRepoContent(username = username, repoName = repoName).value.map {
-      case Right(content) =>
-        Ok(views.html.repoContent(content, username, repoName))
+      case Right(contentt) =>
+        Ok(views.html.repoContent(contentt, username, repoName))
       case Left(apiError: APIError) =>
         BadRequest((Json.obj("error" -> apiError.reason)))
     }
@@ -115,13 +116,13 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
     libService.getFileOrDirContent(username = username, repoName = repoName, path = path).value.map {
       case Right(content) => content match {
         case Right(content1) => Ok {
-//          Json.toJson(content1)
+//          println(Json.toJson(content1))
           val textDecoded:String = new String(java.util.Base64.getDecoder.decode(content1.content.replace("\n","")), StandardCharsets.UTF_8)
           val contentNew = content1.copy(content = textDecoded)
           views.html.fileContent(contentNew, username, repoName, path)
         }
         case Left(content2) => Ok {
-//          Json.toJson(content2)
+//          println(Json.toJson(content2))
           views.html.dirContent(content2, username, repoName, path)
 
         }

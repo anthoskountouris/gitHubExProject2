@@ -11,12 +11,12 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 GET     /api        controllers.ApplicationController.index
 
-GET     /github/users/:username     controllers.ApplicationController.getGithubUser(username:String)
-
 POST     /create      controllers.ApplicationController.create()
 GET     /read/:username      controllers.ApplicationController.read(username:String)
 PUT     /update/:username     controllers.ApplicationController.update(username:String)
 DELETE      /delete/:username     controllers.ApplicationController.delete(username:String)
+
+GET     /github/users/:username     controllers.ApplicationController.getGithubUser(username:String)
 
 GET    /github/addUser/:username       controllers.ApplicationController.addGithubUserFromApi(username: String)
 
@@ -26,3 +26,8 @@ GET /github/users/:username/repos/:repoName     controllers.ApplicationControlle
 
 GET /github/users/:username/repos/:repoName/*path       controllers.ApplicationController.getFileOrDirContent(username:String, repoName:String, path:String)
 
+#POST /github/users/:username/repos/:repoName/*path       controllers.ApplicationController.createFileOrDirectory(username:String, repoName:String, path:String)
+
+#PUT /github/users/:username/repos/:repoName/*path       controllers.ApplicationController.updateFileOrDirectory(username:String, repoName:String, path:String)
+
+#DELETE /github/users/:username/repos/:repoName/*path       controllers.ApplicationController.deleteFileOrDirectory(username:String, repoName:String, path:String)

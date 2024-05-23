@@ -79,19 +79,21 @@ class LibraryConnector @Inject()(ws: WSClient) {
       response.map {
         result =>
           result.status match {
-            case 200 => result.json.validate[List[Response]] match {
+            case 200 => result.json.validate[List[DirContent]] match {
               case JsSuccess(dataModel: List[DirContent], _) =>
                 Right(Left(result.json.as[List[DirContent]]))
-              case JsError(_) => Right(Right(result.json.as[FileContent]))
+              case JsError(_) => result.json.validate[FileContent] match {
+                case JsSuccess(dataModel: FileContent, _) =>
+                  Right(Right(result.json.as[FileContent]))
+                case JsError(_) => Left(APIError.BadAPIResponse(result.status, result.statusText))
+              }
             }
             case _ =>
               Left(APIError.BadAPIResponse(result.status, result.statusText))
           }
       }.recover { case _: WSResponse =>
         Left(APIError.BadAPIResponse(500, "Could not connect"))
-
       }
-
     }
   }
 }

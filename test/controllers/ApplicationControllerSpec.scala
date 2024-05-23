@@ -10,6 +10,7 @@ import play.api.test
 import play.api.test.Helpers.{await, contentAsJson, defaultAwaitTimeout}
 import play.api.test.{FakeRequest, Injecting}
 
+import java.awt.AWTEvent
 import scala.concurrent.Future
 
 class ApplicationControllerSpec extends BaseSpecWithApplication with Injecting {
@@ -156,5 +157,27 @@ class ApplicationControllerSpec extends BaseSpecWithApplication with Injecting {
       println(await(resultFuture))
     }
   }
+
+  "ApplicationController .getFileOrDirContent" should {
+    "return a view a file's content or a dir's content " in {
+      val existingUsername:String = "anthoskountouris"
+      val existingRepository:String ="Analysing_The_Discourse_Related_To_Electrical_Vehicles_On_Social_Media"
+      val filePath:String = "/.gitignore"
+      val resultFuture: Future[Result] = TestApplicationController.getFileOrDirContent(existingUsername, existingRepository, filePath)(FakeRequest())
+      await(resultFuture).header.status shouldBe OK
+      println(await(resultFuture).body)
+    }
+
+    "return a view a dir's content " in {
+      val existingUsername:String = "anthoskountouris"
+      val existingRepository:String ="Analysing_The_Discourse_Related_To_Electrical_Vehicles_On_Social_Media"
+      val filePath:String = "/Twitter_API"
+      val resultFuture: Future[Result] = TestApplicationController.getFileOrDirContent(existingUsername, existingRepository, filePath)(FakeRequest())
+      await(resultFuture).header.status shouldBe OK
+      println(await(resultFuture).body)
+    }
+  }
+
+
 
 }

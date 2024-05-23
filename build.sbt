@@ -19,12 +19,14 @@ libraryDependencies ++= Seq(
   "org.scalamock"          %% "scalamock"               % "5.2.0"             % Test,
   "org.scalatestplus.play" %% "scalatestplus-play"   % "5.0.0"          % Test,
   ws,
-  "org.typelevel"                %% "cats-core"                 % "2.3.0"
+  "org.typelevel"                %% "cats-core"                 % "2.3.0",
+  "com.github.tomakehurst" % "wiremock-jre8" % "2.33.2" % Test
 )
 
+dependencyOverrides +="com.fasterxml.jackson.core" % "jackson-databind" % "2.11.0"
 
 // Adds additional packages into Twirl
-//TwirlKeys.templateImports += "com.example.controllers._"
+// TwirlKeys.templateImports += "com.example.controllers._"
 
 // Adds additional packages into conf/routes
 // play.sbt.routes.RoutesKeys.routesImport += "com.example.binders._"
