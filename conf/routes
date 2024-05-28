@@ -36,7 +36,7 @@ PUT /github/users/:username/repos/:repoName/*path       controllers.ApplicationC
 #curl -L \
 #  -X PUT \
 #  -H "Accept: application/vnd.github+json" \
-#  -H "Authorization: Bearer ---" \
+
 #  -H "X-GitHub-Api-Version: 2022-11-28" \
 #  https://api.github.com/repos/anthoskountouris/GitHubTest/contents/.gitignore \
 #  -d '{"message":"my commit message","content":"Ly5EU19TdG9yZQ==\n"}'
@@ -47,7 +47,7 @@ PUT /github/users/:username/repos/:repoName/*path       controllers.ApplicationC
 #curl -L \
 #  -X PUT \
 #  -H "Accept: application/vnd.github+json" \
-#  -H "Authorization: Bearer ---" \
+
 #  -H "X-GitHub-Api-Version: 2022-11-28" \
 #  https://api.github.com/repos/anthoskountouris/GitHubTest/contents/.gitignore \
 #  -d '{"message":"my commit message","content":"Ly5EU19TdG9yZQ==\n"}'
@@ -55,7 +55,7 @@ PUT /github/users/:username/repos/:repoName/*path       controllers.ApplicationC
 ##Accept: application/vnd.github+json
 #curl -i -X POST \
 #  -H "Accept: application/vnd.github+json" \
-#  -H "Authorization: Bearer ---" \
+
 #  -H "X-GitHub-Api-Version: 2022-11-28" \
 #  -d '{"message":"my commit message","content":"Ly5EU19TdG9yZQ==\n"}' \
 #  http://localhost:9000/github/users/anthoskountouris/repos/GitHubTest/test.py
@@ -72,7 +72,7 @@ PUT /github/users/:username/repos/:repoName/*path       controllers.ApplicationC
 
 #curl -i -X POST \
 #-H "Accept: application/json" \
-#-H "Authorization: Bearer ----" \
+
 #-H "Content-Type: application/json" \
 #-H "X-GitHub-Api-Version: 2022-11-28" \
 #-d '{"message":"my commit message","content":"Ly5EU19TdG9yZQ==\n"}' \
