@@ -1,6 +1,6 @@
 package controllers
 
-import models.{APIError, DirContent, FileContent, GitHubUser, UserRepos}
+import models.{APIError, DirContent, FileContent, GitHubUser, NewFile, UserRepos}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import play.mvc.Results.redirect
@@ -131,5 +131,21 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
         BadRequest{Json.obj("error" -> apiError.reason)}
     }
   }
+
+  def createFileOrDirectory(username: String, repoName: String, path: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    request.body.validate[NewFile] match {
+      case JsSuccess(dataModel: NewFile, _) =>
+        println(s"Received request to create file: $dataModel")
+        libService.createFileOrDirectory(username = username, repoName = repoName, path = path, dataModel = dataModel ).map{ response =>
+          println(s"Response from GitHub API: ${response.json}")
+          Created
+        }
+
+      case JsError(errors) =>
+        println(s"Request validation failed: $errors")
+        Future.successful(BadRequest)
+    }
+//  }
 }
 
+  }

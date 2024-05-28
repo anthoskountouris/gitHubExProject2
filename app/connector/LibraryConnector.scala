@@ -1,9 +1,13 @@
 package connector
 
+import akka.actor.typed.delivery.internal.ProducerControllerImpl.Request
 import cats.data.EitherT
+import com.google.common.io.BaseEncoding
 import models._
-import play.api.libs.json.{JsError, JsSuccess, OFormat}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json, OFormat}
 import play.api.libs.ws.{WSClient, WSResponse}
+import play.shaded.ahc.io.netty.handler.codec.base64.Base64
+import play.shaded.ahc.org.asynchttpclient.Response
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -96,4 +100,22 @@ class LibraryConnector @Inject()(ws: WSClient) {
       }
     }
   }
+
+  def post(url: String, dataModel: NewFile): Future[WSResponse]  = {
+    val token = sys.env.getOrElse("AuthPassword", throw new RuntimeException("AuthPassword environment variable not set"))
+    println("token: " + token)
+//    println(sys.env)
+//    val request = ws.url(url)
+    val contentBase64 = BaseEncoding.base64().encode(dataModel.content.getBytes("UTF-8"))
+    val dataModelJson = Json.toJson(dataModel.copy(content = contentBase64))
+//    val dataModelJson = Json.toJson(dataModel)
+    val request = ws.url(url).withMethod("PUT").withHttpHeaders("Authorization" -> s"Bearer $token")
+    println(s"POST URL: $url")
+    println(s"Payload: $dataModelJson")
+//    request.post
+    request.put(dataModelJson)
+  }
+
+  // try submitting only content with body
+
 }

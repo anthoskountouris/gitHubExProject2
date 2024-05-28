@@ -3,9 +3,10 @@ package service
 import akka.http.scaladsl.model.Uri.Path
 import cats.data.EitherT
 import connector.LibraryConnector
-import models.{APIError, DirContent, FileContent, GitHubUser, RepoContent, UserRepos}
+import models.{APIError, DirContent, FileContent, GitHubUser, NewFile, RepoContent, UserRepos}
 import play.api.libs.json.Format.GenericFormat
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
+import play.api.libs.ws.WSResponse
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -26,12 +27,12 @@ class LibraryService @Inject()(connector:LibraryConnector){
       connector.get3[DirContent](urlOverride.getOrElse(s"https://api.github.com/repos/$username/$repoName/contents/$path")) orElse (
         connector.get3[FileContent](urlOverride.getOrElse(s"https://api.github.com/repos/$username/$repoName/contents/$path"))
       )
+  }
 
-
-    // create a data model for the contents in the repository
-    // check the contents retrieved from the getRepoContent:
-    // if "type" = "file" show content
-    // else if "type" = dir, show content of the dir
+  def createFileOrDirectory(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:NewFile)(implicit ex: ExecutionContext): Future[WSResponse] ={
+    val url = urlOverride.getOrElse(s"https://api.github.com/repos/$username/$repoName/contents/$path")
+    println(s"Creating file at: $url")
+    connector.post(url, dataModel = dataModel)
   }
 
 }
