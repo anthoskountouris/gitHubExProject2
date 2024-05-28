@@ -32,53 +32,5 @@ PUT /github/users/:username/repos/:repoName/*path       controllers.ApplicationC
 
 #DELETE /github/users/:username/repos/:repoName/*path       controllers.ApplicationController.deleteFileOrDirectory(username:String, repoName:String, path:String)
 
-
-#curl -L \
-#  -X PUT \
-#  -H "Accept: application/vnd.github+json" \
-
-#  -H "X-GitHub-Api-Version: 2022-11-28" \
-#  https://api.github.com/repos/anthoskountouris/GitHubTest/contents/.gitignore \
-#  -d '{"message":"my commit message","content":"Ly5EU19TdG9yZQ==\n"}'
-#
-##{"message":"my commit message","committer":{"name":"Monalisa Octocat","email":"octocat@github.com"},"content":"bXkgbmV3IGZpbGUgY29udGVudHM="}'
-#
-#
-#curl -L \
-#  -X PUT \
-#  -H "Accept: application/vnd.github+json" \
-
-#  -H "X-GitHub-Api-Version: 2022-11-28" \
-#  https://api.github.com/repos/anthoskountouris/GitHubTest/contents/.gitignore \
-#  -d '{"message":"my commit message","content":"Ly5EU19TdG9yZQ==\n"}'
-#
-##Accept: application/vnd.github+json
-#curl -i -X POST \
-#  -H "Accept: application/vnd.github+json" \
-
-#  -H "X-GitHub-Api-Version: 2022-11-28" \
-#  -d '{"message":"my commit message","content":"Ly5EU19TdG9yZQ==\n"}' \
-#  http://localhost:9000/github/users/anthoskountouris/repos/GitHubTest/test.py
-
-
-
-#curl -i -X POST \
-#     -H "Accept: application/json" \
-#     -H "Content-Type: application/json" \
-#     -H "X-GitHub-Api-Version: 2022-11-28" \
-#     -d '{"message":"my commit message","content":"Ly5EU19TdG9yZQ==\n"}' \
-#     localhost:9000/github/users/anthoskountouris/repos/GitHubTest/test.py
-
-
-#curl -i -X POST \
-#-H "Accept: application/json" \
-
-#-H "Content-Type: application/json" \
-#-H "X-GitHub-Api-Version: 2022-11-28" \
-#-d '{"message":"my commit message","content":"Ly5EU19TdG9yZQ==\n"}' \
-#localhost:9000/github/users/anthoskountouris/repos/GitHubTest/test.py
-
-
-
 #curl -i -X PUT -H "Accept: application/json" -H "Content-Type: application/json" -H "X-GitHub-Api-Version: 2022-11-28" -d '{"message":"my commit message","content":"bXkgbmV3IGZpbGUgY29udGVudHM"}' localhost:9000/github/users/anthoskountouris/repos/GitHubTest/ram3.py
 
