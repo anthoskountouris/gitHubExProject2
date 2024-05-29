@@ -102,6 +102,7 @@ class LibraryConnector @Inject()(ws: WSClient) {
   }
 
   def post(url: String, dataModel: NewFile): Future[WSResponse]  = {
+//    println("Sys.env: "+sys.env)
     val token = sys.env.getOrElse("AuthPassword", throw new RuntimeException("AuthPassword environment variable not set"))
     println("token: " + token)
 //    println(sys.env)
@@ -112,10 +113,29 @@ class LibraryConnector @Inject()(ws: WSClient) {
     val request = ws.url(url).withMethod("PUT").withHttpHeaders("Authorization" -> s"Bearer $token")
     println(s"POST URL: $url")
     println(s"Payload: $dataModelJson")
-//    request.post
     request.put(dataModelJson)
   }
 
-  // try submitting only content with body
+  def put(url:String, dataModel: UpdatedFile): Future[WSResponse] = {
+    val token = sys.env.getOrElse("AuthPassword", throw new RuntimeException("AuthPassword environment variable not set"))
+    println("token: " + token)
+    val contentBase64 = BaseEncoding.base64().encode(dataModel.content.getBytes("UTF-8"))
+    val dataModelJson = Json.toJson(dataModel.copy(content = contentBase64))
+    val request = ws.url(url).withMethod("PUT").withHttpHeaders("Authorization" -> s"Bearer $token")
+    println(s"POST URL: $url")
+    println(s"Payload: $dataModelJson")
+    request.put(dataModelJson)
+  }
+
+  def delete(url:String, payload:DeleteFile): Future[WSResponse] = {
+    val token = sys.env.getOrElse("AuthPassword", throw new RuntimeException("AuthPassword environment variable not set"))
+    println("token: " + token)
+    val request = ws.url(url)
+      .withMethod("DELETE")
+      .withHttpHeaders("Authorization" -> s"Bearer $token")
+      .withBody(Json.toJson(payload))
+    println(s"DELETE URL: $url")
+    request.delete()
+  }
 
 }

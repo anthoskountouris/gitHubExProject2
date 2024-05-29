@@ -1,6 +1,6 @@
 package controllers
 
-import models.{APIError, DirContent, FileContent, GitHubUser, NewFile, UserRepos}
+import models.{APIError, DeleteFile, DirContent, FileContent, GitHubUser, NewFile, UpdatedFile, UserRepos}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
 import play.mvc.Results.redirect
@@ -9,7 +9,8 @@ import service.{LibraryService, RepositoryService}
 
 import java.nio.charset.StandardCharsets
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.reflect.io.Path
 
 
@@ -147,5 +148,45 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
     }
 //  }
 }
+
+  def updateFile(username:String, repoName:String, path:String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    request.body.validate[UpdatedFile] match {
+      case JsSuccess(dataModel: UpdatedFile, _) =>
+//        println(s"Received request to create file: $dataModel")
+//        val futurwSha = libService.getFileOrDirContent(username = username, repoName = repoName, path = path).value.map {
+//          case Right(content) => content match {
+//            case Right(content1) =>
+//             content1.sha
+//          }
+//          case Left(_) => "Failed"
+//    }
+//        val shaValue:String = Await.result(futurwSha, 5.seconds)
+//        val updatedDataModel = dataModel.copy(sha = shaValue)
+        libService.updateFile(username = username, repoName = repoName, path = path, dataModel = dataModel).map{ response =>
+          println(s"Response from GitHub API: ${response.json}")
+          Created
+        }
+
+      case JsError(errors) =>
+        println(s"Request validation failed: $errors")
+        Future.successful(BadRequest)
+    }
+
+  }
+
+  def deleteFile(username:String, repoName:String, path:String):Action[JsValue] = Action.async(parse.json) { implicit request =>
+    request.body.validate[DeleteFile] match {
+      case JsSuccess(dataModel: DeleteFile, _) =>
+        println(s"Received request to delete file: $dataModel")
+        libService.deleteFile(username = username, repoName = repoName, path = path, dataModel = dataModel).map{response =>
+          println(s"Response from GitHub API: ${response.json}")
+          Accepted("File deleted successfully.")
+        }
+
+      case JsError(errors) =>
+        println(s"Request validation failed: $errors")
+        Future.successful(BadRequest)
+    }
+  }
 
   }

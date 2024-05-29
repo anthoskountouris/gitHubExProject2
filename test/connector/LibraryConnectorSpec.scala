@@ -156,7 +156,6 @@ class LibraryConnectorSpec extends BaseSpecWithApplication {
       response.status mustEqual 200
       response.body shouldBe "[{\"name\":\"Search_Twitter_API.py\",\"path\":\"Twitter_API/Search_Twitter_API.py\",\"type\":\"file\"},{\"name\":\"Streaming_Twitter_te_Final.py\",\"path\":\"Twitter_API/Streaming_Twitter_te_Final.py\",\"type\":\"file\"}]"
     }
-
   }
 
 }

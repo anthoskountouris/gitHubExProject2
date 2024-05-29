@@ -3,12 +3,15 @@ package service
 import akka.http.scaladsl.model.Uri.Path
 import cats.data.EitherT
 import connector.LibraryConnector
-import models.{APIError, DirContent, FileContent, GitHubUser, NewFile, RepoContent, UserRepos}
+import models.{APIError, DeleteFile, DirContent, FileContent, GitHubUser, NewFile, RepoContent, UpdatedFile, UserRepos}
 import play.api.libs.json.Format.GenericFormat
+import play.api.libs.json.JsValue
 import play.api.libs.json.OFormat.oFormatFromReadsAndOWrites
 import play.api.libs.ws.WSResponse
+import play.mvc.BodyParser.Json
 
 import javax.inject.Inject
+import javax.swing.JDialog
 import scala.concurrent.{ExecutionContext, Future}
 
 class LibraryService @Inject()(connector:LibraryConnector){
@@ -35,6 +38,16 @@ class LibraryService @Inject()(connector:LibraryConnector){
     connector.post(url, dataModel = dataModel)
   }
 
+  def updateFile(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:UpdatedFile)(implicit ex: ExecutionContext): Future[WSResponse] = {
+    val url = urlOverride.getOrElse(s"https://api.github.com/repos/$username/$repoName/contents/$path")
+    println(s"Updating file at: $url")
+    connector.put(url, dataModel = dataModel)
+  }
+  def deleteFile(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:DeleteFile)(implicit ex: ExecutionContext): Future[WSResponse] = {
+    val url = urlOverride.getOrElse(s"https://api.github.com/repos/$username/$repoName/contents/$path")
+    println(s"Deleting file at: $url")
+    connector.delete(url, payload = dataModel)
+  }
 }
 
 // DIR
