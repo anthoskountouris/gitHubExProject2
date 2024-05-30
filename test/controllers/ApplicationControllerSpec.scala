@@ -1,7 +1,8 @@
 package controllers
 
 import baseSpec.BaseSpecWithApplication
-import models.GitHubUser
+import com.jayway.jsonpath.EvaluationListener.FoundResult
+import models.{DeleteFile, GitHubUser, NewFile, UpdatedFile}
 import play.api.http.Status
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
@@ -9,6 +10,7 @@ import play.api.mvc.Result
 import play.api.test
 import play.api.test.Helpers.{await, contentAsJson, defaultAwaitTimeout}
 import play.api.test.{FakeRequest, Injecting}
+import play.libs.ws.WSResponse
 
 import java.awt.AWTEvent
 import scala.concurrent.Future
@@ -178,6 +180,74 @@ class ApplicationControllerSpec extends BaseSpecWithApplication with Injecting {
     }
   }
 
+  private val dataModelCreate:NewFile = NewFile (
+    message = "New commit",
+    content = "Apoel Ultras"
+  )
 
+  "ApplicationController .createFile" should {
+    val existingUsername:String = "anthoskountouris"
+    val existingRepository:String ="Analysing_The_Discourse_Related_To_Electrical_Vehicles_On_Social_Media"
+    val filePath:String = "/random10.py"
+
+    "creates a file in a specified repository" in {
+      val request:FakeRequest[JsValue] = buildPut(s"/github/users/${existingUsername}/repos/${existingRepository}/create${filePath}").withBody[JsValue](Json.toJson(dataModelCreate))
+      val resultFuture: Future[Result] = TestApplicationController.createFile(existingUsername, existingRepository, filePath)(request)
+      await(resultFuture).header.status shouldBe CREATED
+    }
+
+    "return 400 when having a not acceptable json" in {
+      val request:FakeRequest[JsValue] = buildPut(s"/github/users/${existingUsername}/repos/${existingRepository}/create${filePath}").withBody[JsValue](Json.toJson(dataModel))
+      val resultFuture: Future[Result] = TestApplicationController.createFile(existingUsername, existingRepository, filePath)(request)
+      await(resultFuture).header.status shouldBe BAD_REQUEST
+      }
+    }
+
+  private val dataModelUpdate:UpdatedFile = UpdatedFile (
+    message = "New commit",
+    content = "Apoel Ultras",
+    sha = "123xewxem3121"
+  )
+
+  "ApplicationController .updateFile" should {
+    val existingUsername:String = "anthoskountouris"
+    val existingRepository:String ="Analysing_The_Discourse_Related_To_Electrical_Vehicles_On_Social_Media"
+    val filePath:String = "/random10.py"
+
+    "creates a file in a specified repository" in {
+      val request:FakeRequest[JsValue] = buildPut(s"/github/users/${existingUsername}/repos/${existingRepository}/update${filePath}").withBody[JsValue](Json.toJson(dataModelUpdate))
+      val resultFuture: Future[Result] = TestApplicationController.updateFile(existingUsername, existingRepository, filePath)(request)
+      await(resultFuture).header.status shouldBe CREATED
+    }
+
+    "return 400 when having a not acceptable json" in {
+      val request:FakeRequest[JsValue] = buildPut(s"/github/users/${existingUsername}/repos/${existingRepository}/update${filePath}").withBody[JsValue](Json.toJson(dataModel))
+      val resultFuture: Future[Result] = TestApplicationController.updateFile(existingUsername, existingRepository, filePath)(request)
+      await(resultFuture).header.status shouldBe BAD_REQUEST
+    }
+  }
+
+  private val dataModelDelete:DeleteFile = DeleteFile (
+    message = "New commit",
+    sha = "123xewxem3121"
+  )
+
+  "ApplicationController .deleteFile" should {
+    val existingUsername:String = "anthoskountouris"
+    val existingRepository:String ="Analysing_The_Discourse_Related_To_Electrical_Vehicles_On_Social_Media"
+    val filePath:String = "/random10.py"
+
+    "creates a file in a specified repository" in {
+      val request:FakeRequest[JsValue] = buildDelete(s"/github/users/${existingUsername}/repos/${existingRepository}/delete${filePath}").withBody[JsValue](Json.toJson(dataModelDelete))
+      val resultFuture: Future[Result] = TestApplicationController.deleteFile(existingUsername, existingRepository, filePath)(request)
+      await(resultFuture).header.status shouldBe ACCEPTED
+    }
+
+    "return 400 when having a not acceptable json" in {
+      val request:FakeRequest[JsValue] = buildDelete(s"/github/users/${existingUsername}/repos/${existingRepository}/delete${filePath}").withBody[JsValue](Json.toJson(dataModel))
+      val resultFuture: Future[Result] = TestApplicationController.deleteFile(existingUsername, existingRepository, filePath)(request)
+      await(resultFuture).header.status shouldBe BAD_REQUEST
+    }
+  }
 
 }

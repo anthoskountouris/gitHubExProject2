@@ -32,18 +32,18 @@ class LibraryService @Inject()(connector:LibraryConnector){
       )
   }
 
-  def createFileOrDirectory(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:NewFile)(implicit ex: ExecutionContext): Future[WSResponse] ={
+  def createFile(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:NewFile)(implicit ex: ExecutionContext): Future[Either[APIError,WSResponse]] ={
     val url = urlOverride.getOrElse(s"https://api.github.com/repos/$username/$repoName/contents/$path")
     println(s"Creating file at: $url")
     connector.post(url, dataModel = dataModel)
   }
 
-  def updateFile(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:UpdatedFile)(implicit ex: ExecutionContext): Future[WSResponse] = {
+  def updateFile(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:UpdatedFile)(implicit ex: ExecutionContext): Future[Either[APIError,WSResponse]]  = {
     val url = urlOverride.getOrElse(s"https://api.github.com/repos/$username/$repoName/contents/$path")
     println(s"Updating file at: $url")
     connector.put(url, dataModel = dataModel)
   }
-  def deleteFile(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:DeleteFile)(implicit ex: ExecutionContext): Future[WSResponse] = {
+  def deleteFile(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:DeleteFile)(implicit ex: ExecutionContext): Future[Either[APIError,WSResponse]]  = {
     val url = urlOverride.getOrElse(s"https://api.github.com/repos/$username/$repoName/contents/$path")
     println(s"Deleting file at: $url")
     connector.delete(url, payload = dataModel)

@@ -14,7 +14,7 @@ import play.api.libs.ws.WSClient
 import play.api.mvc.{AnyContentAsEmpty, MessagesControllerComponents}
 import play.api.test.CSRFTokenHelper.CSRFFRequestHeader
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{GET, POST}
+import play.api.test.Helpers.{DELETE, GET, POST, PUT}
 import repositories.DataRepository
 import service.{LibraryService, RepositoryService}
 import shared.TestRequest
@@ -55,5 +55,11 @@ trait BaseSpecWithApplication extends BaseSpec with GuiceOneServerPerSuite with 
 
   def buildGet(url: String): FakeRequest[AnyContentAsEmpty.type] =
     FakeRequest(GET, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+  def buildPut(url: String): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(PUT, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
+
+  def buildDelete(url: String): FakeRequest[AnyContentAsEmpty.type] =
+    FakeRequest(DELETE, url).withCSRFToken.asInstanceOf[FakeRequest[AnyContentAsEmpty.type]]
 
 }

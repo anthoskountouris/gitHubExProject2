@@ -133,54 +133,59 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
     }
   }
 
-  def createFileOrDirectory(username: String, repoName: String, path: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def createFile(username: String, repoName: String, path: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[NewFile] match {
       case JsSuccess(dataModel: NewFile, _) =>
         println(s"Received request to create file: $dataModel")
-        libService.createFileOrDirectory(username = username, repoName = repoName, path = path, dataModel = dataModel ).map{ response =>
-          println(s"Response from GitHub API: ${response.json}")
-          Created
+        libService.createFile(username = username, repoName = repoName, path = path, dataModel = dataModel ).map{
+          case Right(response) => {
+            println(s"Response from GitHub API: ${response.json}")
+            println(s"Response body from GitHub API: ${response.body}")
+            Created
+          }
+          case Left(apiError: APIError) => {
+            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+          }
         }
 
       case JsError(errors) =>
         println(s"Request validation failed: $errors")
         Future.successful(BadRequest)
     }
-//  }
 }
 
   def updateFile(username:String, repoName:String, path:String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[UpdatedFile] match {
       case JsSuccess(dataModel: UpdatedFile, _) =>
-//        println(s"Received request to create file: $dataModel")
-//        val futurwSha = libService.getFileOrDirContent(username = username, repoName = repoName, path = path).value.map {
-//          case Right(content) => content match {
-//            case Right(content1) =>
-//             content1.sha
-//          }
-//          case Left(_) => "Failed"
-//    }
-//        val shaValue:String = Await.result(futurwSha, 5.seconds)
-//        val updatedDataModel = dataModel.copy(sha = shaValue)
-        libService.updateFile(username = username, repoName = repoName, path = path, dataModel = dataModel).map{ response =>
-          println(s"Response from GitHub API: ${response.json}")
-          Created
+        libService.updateFile(username = username, repoName = repoName, path = path, dataModel = dataModel).map{
+          case Right(response) => {
+            println(s"Response from GitHub API: ${response.json}")
+            Created
+          }
+          case Left(apiError: APIError) => {
+            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+          }
         }
 
       case JsError(errors) =>
         println(s"Request validation failed: $errors")
         Future.successful(BadRequest)
     }
-
   }
 
   def deleteFile(username:String, repoName:String, path:String):Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[DeleteFile] match {
       case JsSuccess(dataModel: DeleteFile, _) =>
         println(s"Received request to delete file: $dataModel")
-        libService.deleteFile(username = username, repoName = repoName, path = path, dataModel = dataModel).map{response =>
-          println(s"Response from GitHub API: ${response.json}")
-          Accepted("File deleted successfully.")
+        libService.deleteFile(username = username, repoName = repoName, path = path, dataModel = dataModel).map{
+          case Right(response) => {
+            println(s"Response from GitHub API: ${response.json}")
+            println(s"Response body from GitHub API: ${response.body}")
+            Accepted("File deleted successfully.")
+          }
+          case Left(apiError:APIError) => {
+            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+          }
         }
 
       case JsError(errors) =>

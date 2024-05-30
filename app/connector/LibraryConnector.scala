@@ -12,7 +12,7 @@ import play.shaded.ahc.org.asynchttpclient.Response
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class LibraryConnector @Inject()(ws: WSClient) {
+class LibraryConnector @Inject()(ws: WSClient)(implicit ec: ExecutionContext) {
   def get[Response](url: String)(implicit rds: OFormat[Response], ec: ExecutionContext): EitherT[Future, APIError, Response] = {
     val request = ws.url(url)
     val response = request.get()
@@ -101,7 +101,7 @@ class LibraryConnector @Inject()(ws: WSClient) {
     }
   }
 
-  def post(url: String, dataModel: NewFile): Future[WSResponse]  = {
+  def post(url: String, dataModel: NewFile): Future[Either[APIError, WSResponse]]  = {
 //    println("Sys.env: "+sys.env)
     val token = sys.env.getOrElse("AuthPassword", throw new RuntimeException("AuthPassword environment variable not set"))
     println("token: " + token)
@@ -113,10 +113,16 @@ class LibraryConnector @Inject()(ws: WSClient) {
     val request = ws.url(url).withMethod("PUT").withHttpHeaders("Authorization" -> s"Bearer $token")
     println(s"POST URL: $url")
     println(s"Payload: $dataModelJson")
-    request.put(dataModelJson)
+    request.put(dataModelJson).map(Right(_)).recover {
+      case ex: Throwable =>
+        println(s"Error occurred: ${ex.getMessage}")
+        Left(APIError.BadAPIResponse(500, ex.getMessage))
+//        println(s"Error occurred: ${ex.getMessage}")
+        // You can provide a default WSResponse or rethrow the exception if needed
+    }
   }
 
-  def put(url:String, dataModel: UpdatedFile): Future[WSResponse] = {
+  def put(url:String, dataModel: UpdatedFile): Future[Either[APIError, WSResponse]] = {
     val token = sys.env.getOrElse("AuthPassword", throw new RuntimeException("AuthPassword environment variable not set"))
     println("token: " + token)
     val contentBase64 = BaseEncoding.base64().encode(dataModel.content.getBytes("UTF-8"))
@@ -124,10 +130,14 @@ class LibraryConnector @Inject()(ws: WSClient) {
     val request = ws.url(url).withMethod("PUT").withHttpHeaders("Authorization" -> s"Bearer $token")
     println(s"POST URL: $url")
     println(s"Payload: $dataModelJson")
-    request.put(dataModelJson)
+    request.put(dataModelJson).map(Right(_)).recover {
+      case ex: Throwable =>
+        println(s"Error occurred: ${ex.getMessage}")
+        Left(APIError.BadAPIResponse(500, ex.getMessage))
+    }
   }
 
-  def delete(url:String, payload:DeleteFile): Future[WSResponse] = {
+  def delete(url:String, payload:DeleteFile): Future[Either[APIError, WSResponse]] = {
     val token = sys.env.getOrElse("AuthPassword", throw new RuntimeException("AuthPassword environment variable not set"))
     println("token: " + token)
     val request = ws.url(url)
@@ -135,7 +145,11 @@ class LibraryConnector @Inject()(ws: WSClient) {
       .withHttpHeaders("Authorization" -> s"Bearer $token")
       .withBody(Json.toJson(payload))
     println(s"DELETE URL: $url")
-    request.delete()
+    request.delete().map(Right(_)).recover {
+      case ex: Throwable =>
+        println(s"Error occurred: ${ex.getMessage}")
+        Left(APIError.BadAPIResponse(500, ex.getMessage))
+    }
   }
 
 }

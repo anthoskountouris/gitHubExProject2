@@ -3,20 +3,22 @@ package services
 import baseSpec.BaseSpec
 import cats.data.EitherT
 import connector.LibraryConnector
-import models.{APIError, DirContent, FileContent, GitHubUser, RepoContent, UserRepos}
+import models.{APIError, DeleteFile, DirContent, FileContent, GitHubUser, NewFile, RepoContent, UpdatedFile, UserRepos}
 import okhttp3.Response
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.{JsValue, Json, OFormat}
+import play.api.libs.ws.WSResponse
 import service.LibraryService
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class LibraryServiceSpec extends BaseSpec with MockFactory with ScalaFutures with GuiceOneAppPerSuite {
   val mockConnector: LibraryConnector = mock[LibraryConnector]
   implicit val executionContext: ExecutionContext = app.injector.instanceOf[ExecutionContext]
   val testService = new LibraryService(mockConnector)
+  val mockResponse = mock[WSResponse]
 
   val user1: JsValue = Json.obj(
     "login" -> "sebdroid",
@@ -187,6 +189,86 @@ class LibraryServiceSpec extends BaseSpec with MockFactory with ScalaFutures wit
 
       whenReady(testService.getFileOrDirContent(urlOverride = Some(url), username = "", repoName = "", path = "").value) {
         result => result shouldBe Left(APIError.BadAPIResponse(500, "Could not connect"))
+      }
+    }
+  }
+
+//  val file1: JsValue = Json.obj(
+//    "message" -> "my new new commit message",
+//    "content" -> "Apoel Thrilos"
+//  )
+  val file1:NewFile = NewFile("my new new commit message", "Apoel Thrilos")
+
+  "createFile" should {
+    val url: String = "testurl"
+    "create a new file in the directory" in {
+
+      (mockConnector.post(_: String, _: NewFile))
+        .expects(url, file1)
+        .returning(Future.successful(Right(mockResponse)))
+
+      whenReady(testService.createFile(urlOverride = Some(url), username = "", repoName = "", path = "", dataModel = file1)) { result =>
+        result shouldBe Right(mockResponse)
+      }
+    }
+
+    "return an error" in {
+      (mockConnector.post(_: String, _: NewFile))
+        .expects(url, file1)
+        .returning(Future.successful(Left(APIError.BadAPIResponse(500, "Internal Server Error"))))
+
+      whenReady(testService.createFile(urlOverride = Some(url), username = "", repoName = "", path = "", dataModel = file1)) { result =>
+        result shouldBe Left(APIError.BadAPIResponse(500, "Internal Server Error"))
+      }
+    }
+  }
+
+  val updatedfile:UpdatedFile = UpdatedFile("my new new commit message", "Apoel Thrilos", "CERV3424243R334F344T5")
+
+  "UpdateFile" should {
+    val url: String = "testurl"
+    "update a file in the directory" in {
+      (mockConnector.put(_: String, _: UpdatedFile))
+        .expects(url, updatedfile)
+        .returning(Future.successful(Right(mockResponse)))
+
+      whenReady(testService.updateFile(urlOverride = Some(url), username = "", repoName = "", path = "", dataModel = updatedfile)) { result =>
+        result shouldBe Right(mockResponse)
+      }
+    }
+
+    "return an error" in {
+      (mockConnector.put(_: String, _: UpdatedFile))
+        .expects(url, updatedfile)
+        .returning(Future.successful(Left(APIError.BadAPIResponse(500, "Internal Server Error"))))
+
+      whenReady(testService.updateFile(urlOverride = Some(url), username = "", repoName = "", path = "", dataModel = updatedfile)) { result =>
+        result shouldBe Left(APIError.BadAPIResponse(500, "Internal Server Error"))
+      }
+    }
+  }
+
+  val deletefile:DeleteFile = DeleteFile("my new new commit message", "CERV3424243R334F344T5")
+
+  "deleteFile" should {
+    val url: String = "testurl"
+    "delete a new file in the directory" in {
+      (mockConnector.delete(_:String, _:DeleteFile))
+        .expects(url, deletefile)
+        .returning(Future.successful(Right(mockResponse)))
+
+      whenReady(testService.deleteFile(urlOverride = Some(url), username = "", repoName = "", path = "", dataModel = deletefile)) { result =>
+        result shouldBe Right(mockResponse)
+      }
+    }
+
+    "return an error" in {
+      (mockConnector.delete(_: String, _: DeleteFile))
+        .expects(url, deletefile)
+        .returning(Future.successful(Left(APIError.BadAPIResponse(500, "Internal Server Error"))))
+
+      whenReady(testService.deleteFile(urlOverride = Some(url), username = "", repoName = "", path = "", dataModel = deletefile)) { result =>
+        result shouldBe Left(APIError.BadAPIResponse(500, "Internal Server Error"))
       }
     }
   }
