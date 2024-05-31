@@ -2,7 +2,8 @@ package controllers
 
 import models.{APIError, DeleteFile, DirContent, FileContent, GitHubUser, NewFile, UpdatedFile, UserRepos}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, Request}
+import play.filters.csrf.CSRF
 import play.mvc.Results.redirect
 import repositories.DataRepository
 import service.{LibraryService, RepositoryService}
@@ -137,7 +138,7 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
     request.body.validate[NewFile] match {
       case JsSuccess(dataModel: NewFile, _) =>
         println(s"Received request to create file: $dataModel")
-        libService.createFile(username = username, repoName = repoName, path = path, dataModel = dataModel ).map{
+        libService.createFile(username = username, repoName = repoName, path = path, dataModel = dataModel).map{
           case Right(response) => {
             println(s"Response from GitHub API: ${response.json}")
             println(s"Response body from GitHub API: ${response.body}")
@@ -194,4 +195,41 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
     }
   }
 
+  def accessToken(implicit request: Request[_]) = {
+    CSRF.getToken
   }
+
+  def addFile(username:String, repoName:String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    println("I am In **********")
+    Future.successful(Ok(views.html.addFileForm(NewFile.fileForm, username, repoName)))
+  }
+
+  def addFileForm(username:String, repoName:String):  Action[AnyContent] =  Action.async { implicit request =>
+    accessToken //call the accessToken method
+    println("addFileForm method called")
+    NewFile.fileForm
+      .bindFromRequest()
+      .fold( //from the implicit request we want to bind this to the form in our companion object
+        formWithErrors => {
+          //here write what you want to do if the form has errors
+          Future.successful(BadRequest(views.html.addFileForm(formWithErrors, username, repoName)))
+        },
+        formData => {
+          val path = formData.path
+          println("path "+path)
+          //here write how you would use this data to create a new book (DataModel)
+          libService.createFile(username = username, repoName = repoName, path = path, dataModel = formData).map{
+                case Right(response) => {
+                  println(s"Response from GitHub API: ${response.json}")
+                  println(s"Response body from GitHub API: ${response.body}")
+//                  views.html.fileContent(dataModel, username, repoName, path)
+                  Created
+                }
+                case Left(_) =>
+                  BadRequest(Json.obj("error" -> "Failed"))
+          } recover
+            { case _ => InternalServerError(Json.toJson("File was not created"))}
+        }
+      )
+  }
+}

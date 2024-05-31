@@ -113,7 +113,7 @@ class LibraryConnector @Inject()(ws: WSClient)(implicit ec: ExecutionContext) {
     val request = ws.url(url).withMethod("PUT").withHttpHeaders("Authorization" -> s"Bearer $token")
     println(s"POST URL: $url")
     println(s"Payload: $dataModelJson")
-    request.put(dataModelJson).map(Right(_)).recover {
+    request.put(dataModelJson).map(response => Right(response)).recover {
       case ex: Throwable =>
         println(s"Error occurred: ${ex.getMessage}")
         Left(APIError.BadAPIResponse(500, ex.getMessage))

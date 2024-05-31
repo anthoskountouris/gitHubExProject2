@@ -1,0 +1,18 @@
+@import models.NewFile
+@import helper._
+
+@(fileForm: Form[NewFile], username: String, repoName: String)(implicit request: RequestHeader, messages: Messages)
+@main("Add File"){
+    <div>
+    @helper.form(action = routes.ApplicationController.addFileForm(username, repoName), Symbol("method") -> "POST") {
+        @helper.CSRF.formField
+        <label for="path">Path (File name) </label>
+        @helper.inputText(fileForm("path"), Symbol("id") -> "path", Symbol("_label") -> "")
+        <label for="path">Message </label>
+        @helper.inputText(fileForm("message"), Symbol("_label") -> "")
+        <label for="path">Content </label>
+        @helper.inputText(fileForm("content"), Symbol("_label") -> "")
+        <input class="submitButton" type="submit" value="Submit">
+        }
+    </div>
+}

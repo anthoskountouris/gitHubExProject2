@@ -32,6 +32,12 @@ PUT /github/users/:username/repos/:repoName/update/*path       controllers.Appli
 
 DELETE /github/users/:username/repos/:repoName/delete/*path       controllers.ApplicationController.deleteFile(username:String, repoName:String, path:String)
 
+GET /github/users/:username/addFileForm/repos/:repoName    controllers.ApplicationController.addFile(username:String, repoName:String)
+POST /github/users/:username/addFileForm/repos/:repoName    controllers.ApplicationController.addFileForm(username:String, repoName:String)
+
+#The only valid values for the method attribute are get and post, corresponding to the GET and POST HTTP methods.
+#<form method="put"> is invalid HTML and will be treated like <form>
+
 # The following link is a reposiory to test the CRUD mthods
 # https://api.github.com/repos/anthoskountouris/GitHubTest/contents
 
@@ -48,3 +54,4 @@ DELETE /github/users/:username/repos/:repoName/delete/*path       controllers.Ap
 
 # DELETE
 # curl -i -X DELETE -H "Accept: application/json" -H "Content-Type: application/json" -H "X-GitHub-Api-Version: 2022-11-28" -d '{"message":"my commit new message","sha": "59539bb07188d94a802d973b51dedb366b40198d"}' localhost:9000/github/users/anthoskountouris/repos/GitHubTest/delete/ram10.py
+
