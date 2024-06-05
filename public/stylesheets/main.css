@@ -42,4 +42,27 @@
     border: none;
     cursor: pointer;
     align-items: center;    /* Centers items vertically */
+    margin: 10px;
+}
+
+.success {
+    text-align: center;
+    padding: 30px;
+    /*margin-bottom: 50px;*/
+    /*margin-top: 100px;*/
+    margin: 200px;
+    /*color: blue;*/
+    background-color: darkslategrey;
+    color: white;
+}
+
+.unsuccessful{
+    text-align: center;
+    padding: 30px;
+    /*margin-bottom: 50px;*/
+    /*margin-top: 100px;*/
+    margin: 200px;
+    /*color: blue;*/
+    background-color: darkred;
+    color: white;
 }

@@ -1,18 +1,15 @@
 package controllers
 
-import models.{APIError, DeleteFile, DirContent, FileContent, GitHubUser, NewFile, UpdatedFile, UserRepos}
+import models._
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{Action, AnyContent, BaseController, ControllerComponents, Request}
+import play.api.mvc._
 import play.filters.csrf.CSRF
-import play.mvc.Results.redirect
 import repositories.DataRepository
 import service.{LibraryService, RepositoryService}
 
 import java.nio.charset.StandardCharsets
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.reflect.io.Path
+import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
@@ -97,7 +94,8 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
       //          case JsError(errors) =>
       //            Future(BadRequest(Json.toJson("Invalid data model")))
       case Left(apiError: APIError) =>
-        BadRequest(Json.obj("error" -> apiError.reason))
+        BadRequest(views.html.unsuccessfulPage(apiError.reason))
+//        BadRequest(Json.obj("error" -> apiError.reason))
     }
   }
 
@@ -106,7 +104,8 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
       case Right(contentt) =>
         Ok(views.html.repoContent(contentt, username, repoName))
       case Left(apiError: APIError) =>
-        BadRequest((Json.obj("error" -> apiError.reason)))
+        BadRequest(views.html.unsuccessfulPage(apiError.reason))
+//        BadRequest((Json.obj("error" -> apiError.reason)))
     }
   }
 
@@ -121,6 +120,7 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
 //          println(Json.toJson(content1))
           val textDecoded:String = new String(java.util.Base64.getDecoder.decode(content1.content.replace("\n","")), StandardCharsets.UTF_8)
           val contentNew = content1.copy(content = textDecoded)
+          println("contentNew: " + contentNew)
           views.html.fileContent(contentNew, username, repoName, path)
         }
         case Left(content2) => Ok {
@@ -130,7 +130,9 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
         }
       }
       case Left(apiError: APIError) =>
-        BadRequest{Json.obj("error" -> apiError.reason)}
+//        BadRequest{Json.obj("error" -> apiError.reason)}
+        BadRequest(views.html.unsuccessfulPage(apiError.reason))
+
     }
   }
 
@@ -145,7 +147,8 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
             Created
           }
           case Left(apiError: APIError) => {
-            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+//            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+            BadRequest(views.html.unsuccessfulPage(apiError.reason))
           }
         }
 
@@ -164,17 +167,26 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
             Created
           }
           case Left(apiError: APIError) => {
-            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+//            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+            BadRequest(views.html.unsuccessfulPage(apiError.reason))
           }
         }
 
       case JsError(errors) =>
         println(s"Request validation failed: $errors")
-        Future.successful(BadRequest)
+//        Future.successful(BadRequest)
+        Future.successful(BadRequest(views.html.unsuccessfulPage(errors.toString())))
+
     }
   }
 
+  def accessToken(implicit request: Request[_]) = {
+    CSRF.getToken
+  }
+
   def deleteFile(username:String, repoName:String, path:String):Action[JsValue] = Action.async(parse.json) { implicit request =>
+    println("I am in delete")
+    accessToken
     request.body.validate[DeleteFile] match {
       case JsSuccess(dataModel: DeleteFile, _) =>
         println(s"Received request to delete file: $dataModel")
@@ -185,19 +197,20 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
             Accepted("File deleted successfully.")
           }
           case Left(apiError:APIError) => {
-            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+//            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+            BadRequest(views.html.unsuccessfulPage(apiError.reason))
+
           }
         }
 
       case JsError(errors) =>
         println(s"Request validation failed: $errors")
-        Future.successful(BadRequest)
+        Future.successful(BadRequest(views.html.unsuccessfulPage(errors.toString())))
+//        Future.successful(BadRequest)
+        Future.successful(BadRequest(views.html.unsuccessfulPage(errors.toString())))
     }
   }
 
-  def accessToken(implicit request: Request[_]) = {
-    CSRF.getToken
-  }
 
   def addFile(username:String, repoName:String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
     println("I am In **********")
@@ -219,17 +232,120 @@ class ApplicationController @Inject() (val controllerComponents: ControllerCompo
           println("path "+path)
           //here write how you would use this data to create a new book (DataModel)
           libService.createFile(username = username, repoName = repoName, path = path, dataModel = formData).map{
-                case Right(response) => {
+                case Right(response) => Created{
                   println(s"Response from GitHub API: ${response.json}")
                   println(s"Response body from GitHub API: ${response.body}")
-//                  views.html.fileContent(dataModel, username, repoName, path)
-                  Created
+                  val er = "File successfully created"
+                  views.html.successPage(username, repoName, path, er)
                 }
                 case Left(_) =>
                   BadRequest(Json.obj("error" -> "Failed"))
           } recover
-            { case _ => InternalServerError(Json.toJson("File was not created"))}
+//            { case _ => InternalServerError(Json.toJson("File was not created"))}
+            { case _ => InternalServerError(views.html.unsuccessfulPage("File has not been created"))}
+
         }
       )
+  }
+  def editFile(username:String, repoName:String, file_path:String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    println("I am In **********")
+    val fileContent = libService.getFileOrDirContent(username = username, repoName = repoName, path = file_path).value.map {
+      case Right(content) => content match {
+        case Right(content1) =>
+          val textDecoded:String = new String(java.util.Base64.getDecoder.decode(content1.content.replace("\n","")), StandardCharsets.UTF_8)
+          content1.copy(content = textDecoded)
+        case Left(content2) => BadRequest {
+          //          println(Json.toJson(content2))
+          views.html.unsuccessfulPage("Something went wrong")
+
+        }
+      }
+      case Left(apiError: APIError) =>
+        //        BadRequest{Json.obj("error" -> apiError.reason)}
+        BadRequest(views.html.unsuccessfulPage(apiError.reason))
+
+    }
+//    fileContent.map { file =>
+//      Ok(views.html.updateFileForm(UpdatedFile.fileForm, username, repoName, file_path, file))
+//    }
+    fileContent.map {
+      case file: FileContent => Ok(views.html.updateFileForm(UpdatedFile.fileForm, username, repoName, file_path, file))
+      case _ => BadRequest(views.html.unsuccessfulPage("Something went wrong"))
+    }
+  }
+
+  def editFileForm(username:String, repoName:String, file_path:String): Action[AnyContent] = Action.async { implicit request: Request[AnyContent] =>
+    accessToken //call the accessToken method
+    println("editFileForm method called")
+    libService.getFileOrDirContent(username = username, repoName = repoName, path = file_path).value.map {
+      case Right(content) => content match {
+        case Right(content1) =>
+          val textDecoded: String = new String(java.util.Base64.getDecoder.decode(content1.content.replace("\n", "")), StandardCharsets.UTF_8)
+          content1.copy(content = textDecoded)
+      }
+    }.flatMap {file =>
+      UpdatedFile.fileForm
+        .bindFromRequest()
+        .fold( //from the implicit request we want to bind this to the form in our companion object
+          formWithErrors => {
+            //here write what you want to do if the form has errors
+            Future(BadRequest(views.html.updateFileForm(formWithErrors, username, repoName, file_path, file)))
+          },
+          formData => {
+            println(formData)
+            val sha = file.sha
+            val dataModelCompleted = UpdatedFile(
+              message = formData.message,
+              content = formData.content,
+              sha = sha
+            )
+            println("model: " + dataModelCompleted)
+            println("sha " + sha)
+            //here write how you would use this data to create a new book (DataModel)
+
+            libService.updateFile(username = username, repoName = repoName, path = file_path, dataModel = dataModelCompleted).map{
+              case Right(response) => Created{
+                println(s"Response from GitHub API: ${response.json}")
+                println(s"Response body from GitHub API: ${response.body}")
+                val msg:String = "File updated successfully"
+                views.html.successPage(username, repoName, file_path, msg)
+              }
+              case Left(_) =>
+                BadRequest(Json.obj("error" -> "Failed"))
+            } recover
+            { case _ => InternalServerError(views.html.unsuccessfulPage("File has not been edited"))}
+          }
+        )
+    }
+  }
+
+  def deleteFileForm(username:String, repoName:String, path:String): Action[AnyContent] = Action.async { implicit request =>
+    println("I am in delete")
+    accessToken
+    libService.getFileOrDirContent(username = username, repoName = repoName, path = path).value.map {
+      case Right(content) => content match {
+        case Right(content1) =>
+          val textDecoded: String = new String(java.util.Base64.getDecoder.decode(content1.content.replace("\n", "")), StandardCharsets.UTF_8)
+          content1.copy(content = textDecoded)
+      }
+    }.flatMap{file =>
+      val delFile = DeleteFile(
+        message = "Deletion of the file",
+        sha = file.sha)
+        libService.deleteFile(username = username, repoName = repoName, path = path, dataModel = delFile).map{
+          case Right(response) => Accepted{
+            println(s"Response from GitHub API: ${response.json}")
+            println(s"Response body from GitHub API: ${response.body}")
+            val msg:String = "File deleted successfully"
+            views.html.successPage(username, repoName, path, msg)
+          }
+          case Left(apiError:APIError) => {
+            BadRequest{Json.obj("Status"-> apiError.httpResponseStatus, "error" -> apiError.reason) }
+          }
+        } recover {
+          { case _ => InternalServerError(Json.toJson("The file has not been deleted")) }
+        }
+    }
+
   }
 }

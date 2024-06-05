@@ -14,7 +14,7 @@ object NewFile{
 
   val fileForm:Form[NewFile] = Form(
     mapping(
-      "path" -> text,
+      "path" -> nonEmptyText,
       "message" -> text,
       "content" -> text,
     )(NewFile.apply)(NewFile.unapply)

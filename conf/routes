@@ -32,8 +32,14 @@ PUT /github/users/:username/repos/:repoName/update/*path       controllers.Appli
 
 DELETE /github/users/:username/repos/:repoName/delete/*path       controllers.ApplicationController.deleteFile(username:String, repoName:String, path:String)
 
+# Github API operations
 GET /github/users/:username/addFileForm/repos/:repoName    controllers.ApplicationController.addFile(username:String, repoName:String)
 POST /github/users/:username/addFileForm/repos/:repoName    controllers.ApplicationController.addFileForm(username:String, repoName:String)
+
+GET /github/users/:username/updateFileForm/repos/:repoName/:file_path controllers.ApplicationController.editFile(username:String, repoName:String, file_path:String)
+POST /github/users/:username/updateFileForm/repos/:repoName/:file_path controllers.ApplicationController.editFileForm(username:String, repoName:String, file_path:String)
+
+POST /github/users/:username/delete/repos/:repoName/:file_path controllers.ApplicationController.deleteFileForm(username:String, repoName:String, file_path:String)
 
 #The only valid values for the method attribute are get and post, corresponding to the GET and POST HTTP methods.
 #<form method="put"> is invalid HTML and will be treated like <form>

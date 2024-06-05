@@ -43,6 +43,7 @@ class LibraryService @Inject()(connector:LibraryConnector){
     println(s"Updating file at: $url")
     connector.put(url, dataModel = dataModel)
   }
+
   def deleteFile(urlOverride: Option[String] = None, username:String, repoName:String, path: String, dataModel:DeleteFile)(implicit ex: ExecutionContext): Future[Either[APIError,WSResponse]]  = {
     val url = urlOverride.getOrElse(s"https://api.github.com/repos/$username/$repoName/contents/$path")
     println(s"Deleting file at: $url")

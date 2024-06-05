@@ -151,7 +151,7 @@ class LibraryServiceSpec extends BaseSpec with MockFactory with ScalaFutures wit
     }
   }
 
-  val file:JsValue = Json.parse("""{"name":".gitignore","path":".gitignore","type":"file","content":"Ly5EU19TdG9yZQ==\n"}""")
+  val file:JsValue = Json.parse("""{"name":".gitignore","path":".gitignore","type":"file","content":"Ly5EU19TdG9yZQ==\n","sha": "c96066d3d00458734d41798091d0cf9675d83f11"}""")
   val dir: JsValue = Json.parse("""[{"name":"Search_Twitter_API.py","path":"Twitter_API/Search_Twitter_API.py","type":"file"},{"name":"Streaming_Twitter_te_Final.py","path":"Twitter_API/Streaming_Twitter_te_Final.py","type":"file"}]""")
 
   "getFileOrDirContent" should {
@@ -197,7 +197,7 @@ class LibraryServiceSpec extends BaseSpec with MockFactory with ScalaFutures wit
 //    "message" -> "my new new commit message",
 //    "content" -> "Apoel Thrilos"
 //  )
-  val file1:NewFile = NewFile("my new new commit message", "Apoel Thrilos")
+  val file1:NewFile = NewFile("my new new commit message", "Apoel Thrilos", "apoel.py")
 
   "createFile" should {
     val url: String = "testurl"

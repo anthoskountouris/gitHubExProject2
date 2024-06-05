@@ -1,16 +1,25 @@
-@(fileContent: FileContent, username:String, repoName:String, path:String)
+@import helper._
+@(fileContent: FileContent, username: String, repoName: String, path: String)(implicit request: RequestHeader, messages: Messages)
 
-@main("GitHub User") {
-    <div class="title">
-        <h1>Content of @fileContent.name</h1>
-    </div>
-    <div class="repos">
-        <p>@fileContent.content</p>
-    </div>
+    @main("GitHub User") {
+        <div class="title">
+            <h1>Content of @fileContent.name</h1>
+        </div>
+        <div class="repos">
+            <p>@fileContent.content</p>
+        </div>
 
-    <div class="btn-container">
-        <a class="btn" href="@routes.ApplicationController.getRepoContent(username, repoName)">
-            Back
-        </a>
-    </div>
-}
+        <div class="btn-container">
+        @helper.form(action = routes.ApplicationController.deleteFileForm(username, repoName, path), Symbol("method") -> "POST") {
+            <input type="hidden" name="_method" value="DELETE">
+            @helper.CSRF.formField
+            <button type="submit" class="btn">Delete</button>
+        }
+            <a class="btn" href="@routes.ApplicationController.editFile(username, repoName, path)">
+                Edit
+            </a>
+            <a class="btn" href="@routes.ApplicationController.getRepoContent(username, repoName)">
+                Back
+            </a>
+        </div>
+    }

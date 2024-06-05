@@ -3,6 +3,7 @@
 
 @(fileForm: Form[NewFile], username: String, repoName: String)(implicit request: RequestHeader, messages: Messages)
 @main("Add File"){
+    <h1>Add a file</h1>
     <div>
     @helper.form(action = routes.ApplicationController.addFileForm(username, repoName), Symbol("method") -> "POST") {
         @helper.CSRF.formField

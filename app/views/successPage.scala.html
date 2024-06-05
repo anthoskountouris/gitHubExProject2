@@ -1,0 +1,17 @@
+
+@(username:String, repoName:String, page:String, response_text:String)
+
+@main("Success Page") {
+@*    <div class="title">*@
+@*        <h1>Names of files & folders </h1>*@
+@*    </div>*@
+    <div class="success">
+        <h2>@response_text</h2>
+    </div>
+
+    <div class="btn-container">
+        <a class="btn" href="@routes.ApplicationController.getRepoContent(username, repoName)">
+            Back
+        </a>
+    </div>
+}
